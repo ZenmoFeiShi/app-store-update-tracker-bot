@@ -243,7 +243,7 @@ https://itunes.apple.com/lookup?id=<APP_ID>&country=<REGION>
 
 更新判定逻辑：
 
-- 版本号变化，或
+- 版本号变化
 - 更新说明内容变化
 
 两者任一满足就触发通知。
@@ -254,13 +254,7 @@ https://itunes.apple.com/lookup?id=<APP_ID>&country=<REGION>
 - `CHECK_INTERVAL_MINUTES` 目前只在文档中预留，systemd timer 仍使用固定值
 - SQLite 更适合单机、小规模使用
 - App Store 某些地区返回字段可能不同
-- 同一 App 在不同区服的版本信息可能不一致
-
-## 安全建议
-
-- Bot Token 泄露后要立刻重置
-- 不要把 `.env`、数据库、日志直接提交到 GitHub
-- 如果仓库已误提交敏感信息，除了删除文件，还要立刻轮换密钥
+- 同一 App 在不同区服的版本信息可能不一
 
 ## 后续可扩展
 
@@ -268,7 +262,6 @@ https://itunes.apple.com/lookup?id=<APP_ID>&country=<REGION>
 - 支持多用户管理后台
 - 支持更自然的删除交互
 - 支持自定义检查频率
-- 支持 Docker 部署
 - 支持 Webhook 模式
 - 支持更丰富的通知模板
 
