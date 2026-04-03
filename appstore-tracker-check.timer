@@ -1,0 +1,11 @@
+[Unit]
+Description=Run App Store Tracker checker every 30 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=30min
+Unit=appstore-tracker-check.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

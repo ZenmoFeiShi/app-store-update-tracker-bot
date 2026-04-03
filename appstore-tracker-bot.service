@@ -1,0 +1,13 @@
+[Unit]
+Description=App Store Tracker Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/apps/appstore_tracker
+ExecStart=/root/apps/appstore_tracker/run_bot.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
