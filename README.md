@@ -1,4 +1,4 @@
-# AppStore Telegram Tracker
+# App Store Update Tracker Bot
 
 一个用 Telegram Bot 追踪 Apple App Store 应用更新的轻量项目。
 
@@ -189,6 +189,45 @@ data.db
 - `is_active`
 - `created_at`
 - `updated_at`
+
+## Docker 部署
+
+### 1. 准备环境变量
+
+新建 `.env`：
+
+```env
+TG_BOT_TOKEN=your_bot_token
+TG_DEFAULT_CHAT_ID=your_chat_id
+CHECK_INTERVAL_MINUTES=30
+```
+
+### 2. 启动
+
+```bash
+docker compose up -d --build
+```
+
+### 3. 查看日志
+
+```bash
+docker compose logs -f appstore-bot
+docker compose logs -f appstore-checker
+```
+
+### 4. 停止
+
+```bash
+docker compose down
+```
+
+### 5. 数据持久化
+
+SQLite 数据库会保存在：
+
+```text
+./data/data.db
+```
 
 ## systemd 部署
 

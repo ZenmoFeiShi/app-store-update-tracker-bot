@@ -1,6 +1,6 @@
 # Deployment Guide
 
-这份文档说明如何把 `appstore-telegram-tracker` 部署到 Linux 服务器，并用 `systemd` 常驻运行。
+这份文档说明如何把 `app-store-update-tracker-bot` 部署到 Linux 服务器，并用 `systemd` 常驻运行。
 
 ## 1. 系统要求
 
@@ -14,8 +14,8 @@
 ## 2. 安装项目
 
 ```bash
-git clone https://github.com/yourname/appstore-telegram-tracker.git
-cd appstore-telegram-tracker
+git clone https://github.com/yourname/app-store-update-tracker-bot.git
+cd app-store-update-tracker-bot
 python3 -m venv venv
 . venv/bin/activate
 pip install -r requirements.txt
@@ -173,7 +173,50 @@ sudo systemctl restart appstore-tracker-bot.service
 sudo systemctl start appstore-tracker-check.service
 ```
 
-## 8. 常见问题
+## 8. Docker 部署
+
+如果你更喜欢容器方式，可以直接使用仓库内的：
+
+- `Dockerfile`
+- `docker-compose.yml`
+
+### 1. 准备 `.env`
+
+```env
+TG_BOT_TOKEN=your_bot_token
+TG_DEFAULT_CHAT_ID=your_chat_id
+CHECK_INTERVAL_MINUTES=30
+```
+
+### 2. 启动
+
+```bash
+docker compose up -d --build
+```
+
+### 3. 查看状态
+
+```bash
+docker compose ps
+docker compose logs -f appstore-bot
+docker compose logs -f appstore-checker
+```
+
+### 4. 停止
+
+```bash
+docker compose down
+```
+
+### 5. 数据目录
+
+数据库会保存在：
+
+```text
+./data/data.db
+```
+
+## 9. 常见问题
 
 ### 机器人启动失败
 
@@ -209,7 +252,7 @@ python3 check_updates.py
 3. `chat_id` 是否正确写入数据库
 4. 服务器网络是否可访问 Telegram API
 
-## 9. 安全建议
+## 10. 安全建议
 
 - 不要把真实 Token 写进仓库
 - 不要把 `.env` 提交到 Git

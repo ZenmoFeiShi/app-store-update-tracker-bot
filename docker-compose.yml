@@ -1,0 +1,23 @@
+services:
+  appstore-bot:
+    build: .
+    container_name: appstore-update-tracker-bot
+    restart: unless-stopped
+    environment:
+      TG_BOT_TOKEN: ${TG_BOT_TOKEN}
+      TG_DEFAULT_CHAT_ID: ${TG_DEFAULT_CHAT_ID:-}
+    volumes:
+      - ./data:/app/data
+    command: sh -c 'mkdir -p /app/data && ln -sf /app/data/data.db /app/data.db && /app/run_bot.sh'
+
+  appstore-checker:
+    build: .
+    container_name: appstore-update-checker
+    restart: unless-stopped
+    environment:
+      TG_BOT_TOKEN: ${TG_BOT_TOKEN}
+      TG_DEFAULT_CHAT_ID: ${TG_DEFAULT_CHAT_ID:-}
+      CHECK_INTERVAL_MINUTES: ${CHECK_INTERVAL_MINUTES:-30}
+    volumes:
+      - ./data:/app/data
+    command: sh -c 'mkdir -p /app/data && ln -sf /app/data/data.db /app/data.db && while true; do /app/run_check.sh; sleep ${CHECK_INTERVAL_MINUTES:-30}m; done'
