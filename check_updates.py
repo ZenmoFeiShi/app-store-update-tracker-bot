@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import hashlib
+import asyncio
 from datetime import datetime
 
 import requests
@@ -81,7 +82,7 @@ def main():
         if not changed:
             continue
         text = f"{app['app_name']} 有更新\n版本：{app['version']}\n日期：{today_str()}\n更新内容：\n{app['notes'] or '暂无说明'}\n链接：{row['app_url']}"
-        bot.send_message(chat_id=row['chat_id'], text=text)
+        asyncio.run(bot.send_message(chat_id=row['chat_id'], text=text))
         conn.execute('UPDATE tracked_apps SET app_name=?, last_version=?, last_release_date=?, last_notes=?, last_notes_hash=?, updated_at=? WHERE id=?', (app['app_name'], app['version'], app['release_date'], app['notes'], app['notes_hash'], datetime.now().strftime('%Y-%m-%d %H:%M:%S'), row['id']))
         conn.commit()
     conn.close()
