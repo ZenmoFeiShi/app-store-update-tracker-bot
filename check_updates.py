@@ -2,6 +2,7 @@ import os
 import sqlite3
 import hashlib
 import asyncio
+import re
 from datetime import datetime
 
 import requests
@@ -50,6 +51,24 @@ def today_str():
     return datetime.now().strftime('%Y-%m-%d')
 
 
+def parse_version(v: str):
+    parts = re.findall(r'\d+', v or '')
+    return tuple(int(x) for x in parts) if parts else (0,)
+
+
+def compare_version(a: str, b: str):
+    ta = parse_version(a)
+    tb = parse_version(b)
+    n = max(len(ta), len(tb))
+    ta = ta + (0,) * (n - len(ta))
+    tb = tb + (0,) * (n - len(tb))
+    if ta > tb:
+        return 1
+    if ta < tb:
+        return -1
+    return 0
+
+
 def fetch_app(app_id: str, region: str):
     r = requests.get(APPLE_LOOKUP, params={'id': app_id, 'country': region}, timeout=20)
     r.raise_for_status()
@@ -69,6 +88,23 @@ def fetch_app(app_id: str, region: str):
     }
 
 
+def should_notify(row, app):
+    old_version = row['last_version'] or ''
+    new_version = app['version'] or ''
+    version_cmp = compare_version(new_version, old_version)
+
+    if old_version and version_cmp < 0:
+        return False, 'rollback'
+
+    if version_cmp > 0:
+        return True, 'new_version'
+
+    if version_cmp == 0 and app['notes_hash'] != (row['last_notes_hash'] or ''):
+        return True, 'notes_changed'
+
+    return False, 'no_change'
+
+
 def main():
     init_db()
     conn = db()
@@ -78,8 +114,10 @@ def main():
         app = fetch_app(row['app_id'], row['region'])
         if not app:
             continue
-        changed = (app['version'] != (row['last_version'] or '')) or (app['notes_hash'] != (row['last_notes_hash'] or ''))
-        if not changed:
+        notify, reason = should_notify(row, app)
+        if reason == 'rollback':
+            continue
+        if not notify:
             continue
         text = f"{app['app_name']} 有更新\n版本：{app['version']}\n日期：{today_str()}\n更新内容：\n{app['notes'] or '暂无说明'}\n链接：{row['app_url']}"
         asyncio.run(bot.send_message(chat_id=row['chat_id'], text=text))
