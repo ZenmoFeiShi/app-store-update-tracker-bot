@@ -176,6 +176,16 @@ docker compose down
 ./data/data.db
 ```
 
+### 6. 虚拟环境说明
+
+Docker 镜像构建时会显式创建：
+
+```text
+/app/venv
+```
+
+依赖会安装到这个虚拟环境中，`run_bot.sh` 与 `run_check.sh` 会直接激活它。
+
 ## 🔄 升级方式
 
 ### systemd 方式

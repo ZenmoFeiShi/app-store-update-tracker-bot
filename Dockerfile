@@ -6,7 +6,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m venv /app/venv \
+    && /app/venv/bin/pip install --no-cache-dir --upgrade pip \
+    && /app/venv/bin/pip install --no-cache-dir -r /app/requirements.txt
 
 COPY . /app/
 
