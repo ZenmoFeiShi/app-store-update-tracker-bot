@@ -3,6 +3,7 @@ import sqlite3
 import hashlib
 import asyncio
 import re
+import time
 from datetime import datetime
 
 import requests
@@ -69,23 +70,44 @@ def compare_version(a: str, b: str):
     return 0
 
 
-def fetch_app(app_id: str, region: str):
-    r = requests.get(APPLE_LOOKUP, params={'id': app_id, 'country': region}, timeout=20)
-    r.raise_for_status()
-    data = r.json()
-    results = data.get('results') or []
-    if not results:
+def fetch_app(app_id: str, region: str, retries: int = 5):
+    """多次查询取最新版本，解决 Apple API 缓存不一致问题"""
+    versions = []
+    apps = []
+    
+    for i in range(retries):
+        try:
+            r = requests.get(APPLE_LOOKUP, params={'id': app_id, 'country': region, '_t': int(time.time()*1000)+i}, headers={'Cache-Control': 'no-cache', 'Pragma': 'no-cache'}, timeout=20)
+            r.raise_for_status()
+            data = r.json()
+            results = data.get('results') or []
+            if not results:
+                continue
+            item = results[0]
+            notes = (item.get('releaseNotes') or '').strip()
+            app_data = {
+                'app_name': item.get('trackName') or app_id,
+                'version': item.get('version') or '',
+                'release_date': item.get('currentVersionReleaseDate') or item.get('releaseDate') or '',
+                'notes': notes,
+                'notes_hash': notes_hash(notes),
+                'url': item.get('trackViewUrl') or '',
+            }
+            versions.append(app_data['version'])
+            apps.append(app_data)
+        except Exception:
+            continue
+    
+    if not apps:
         return None
-    item = results[0]
-    notes = (item.get('releaseNotes') or '').strip()
-    return {
-        'app_name': item.get('trackName') or app_id,
-        'version': item.get('version') or '',
-        'release_date': item.get('currentVersionReleaseDate') or item.get('releaseDate') or '',
-        'notes': notes,
-        'notes_hash': notes_hash(notes),
-        'url': item.get('trackViewUrl') or '',
-    }
+    
+    # 取版本号最高的那个
+    max_version = max(versions, key=lambda v: parse_version(v))
+    for app in apps:
+        if app['version'] == max_version:
+            return app
+    
+    return apps[0]
 
 
 def should_notify(row, app):
@@ -111,7 +133,7 @@ def main():
     rows = conn.execute('SELECT * FROM tracked_apps WHERE is_active=1').fetchall()
     bot = Bot(BOT_TOKEN)
     for row in rows:
-        app = fetch_app(row['app_id'], row['region'])
+        app = fetch_app(row['app_id'], row['region'], retries=5)
         if not app:
             continue
         notify, reason = should_notify(row, app)
