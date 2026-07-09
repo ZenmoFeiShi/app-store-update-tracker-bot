@@ -1,6 +1,10 @@
 # 🤖 App Store Update Tracker Bot
 
-一个用于追踪 Apple App Store 应用更新并通过 Telegram 自动推送通知的轻量机器人。
+追踪 Apple App Store 应用更新，并通过 Telegram 自动推送通知的轻量机器人。
+
+[![Stars](https://img.shields.io/github/stars/ZenmoFeiShi/app-store-update-tracker-bot?style=flat-square)](https://github.com/ZenmoFeiShi/app-store-update-tracker-bot/stargazers)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat-square&logo=python)](https://www.python.org/)
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?style=flat-square&logo=docker)](./docker-compose.yml)
 
 用户把 App Store 链接发给机器人后，机器人会自动记录该应用，并由定时任务持续检查版本变化；一旦检测到新版本，就把版本号、发布日期、更新说明和应用链接推送到 Telegram。
 
@@ -35,8 +39,6 @@ pip install -r requirements.txt
 
 ### 3. 配置环境变量
 
-复制示例文件：
-
 ```bash
 cp .env.example .env
 ```
@@ -67,8 +69,6 @@ python3 check_updates.py
 
 ## ⚙️ 配置
 
-### 环境变量
-
 | 变量名 | 必填 | 说明 |
 |---|---|---|
 | `TG_BOT_TOKEN` | 是 | Telegram Bot Token |
@@ -76,16 +76,6 @@ python3 check_updates.py
 | `CHECK_INTERVAL_MINUTES` | 否 | 检查间隔分钟数，默认示例为 `30` |
 
 > 不要把真实 Token、Chat ID、数据库文件或日志提交到公开仓库。
-
-### 工作流程
-
-1. 用户发送 App Store 链接给机器人
-2. 机器人解析链接里的 `app_id` 和 `region`
-3. 调用 Apple iTunes Lookup API 获取当前应用信息
-4. 把追踪信息写入 SQLite
-5. 定时任务轮询所有追踪项
-6. 如果版本号或更新说明发生变化，就推送 Telegram 消息
-7. 推送完成后回写最新版本信息，避免重复通知
 
 ## 🧩 项目结构
 
@@ -110,17 +100,10 @@ python3 check_updates.py
 
 ### 添加追踪
 
-直接把 App Store 链接发给机器人，例如：
+直接把 App Store 链接发给机器人：
 
 ```text
 https://apps.apple.com/cn/app/qq音乐-听我想听/id414603431
-```
-
-机器人会回复类似：
-
-```text
-已加入追踪：QQ音乐
-当前版本：x.x.x
 ```
 
 ### 查看追踪列表
@@ -136,80 +119,16 @@ https://apps.apple.com/cn/app/qq音乐-听我想听/id414603431
 /del 1
 ```
 
-### 更新通知示例
-
-```text
-QQ音乐 有更新
-版本：14.4.0
-日期：2026-04-03
-更新内容：
-修复已知问题，优化播放体验
-链接：https://apps.apple.com/...
-```
-
 ## 🐳 Docker 部署
 
-### 1. 准备 `.env`
-
-```env
-TG_BOT_TOKEN=your_bot_token
-TG_DEFAULT_CHAT_ID=your_chat_id
-CHECK_INTERVAL_MINUTES=30
-```
-
-### 2. 启动
+准备 `.env` 后：
 
 ```bash
-docker compose up -d --build
+docker compose up -d
 ```
 
-### 3. 查看日志
+更完整的部署说明见 [DEPLOYMENT.md](./DEPLOYMENT.md)。
 
-```bash
-docker compose logs -f appstore-bot
-docker compose logs -f appstore-checker
-```
+## Author
 
-### 4. 停止
-
-```bash
-docker compose down
-```
-
-### 5. 数据持久化
-
-SQLite 数据默认保存在：
-
-```text
-./data/data.db
-```
-
-### 6. 虚拟环境说明
-
-Docker 镜像构建时会显式创建：
-
-```text
-/app/venv
-```
-
-依赖安装在这个虚拟环境里，`run_bot.sh` 和 `run_check.sh` 会直接激活并使用它。
-
-## 🛠 部署
-
-支持两种常见部署方式：
-
-- Docker / Docker Compose
-- Linux + systemd
-
-详细步骤见：[`DEPLOYMENT.md`](./DEPLOYMENT.md)
-
-## 🔒 安全提醒
-
-- 不要把真实 `.env` 文件提交到 Git
-- 不要把 Telegram Token、Chat ID、数据库文件提交到公开仓库
-- 建议给环境文件设置最小权限
-- 如果 Token 泄露，请立即重置并重新部署
-
-## 📄 License
-
-本项目当前未单独声明 License；如需开源分发，建议补充明确的 License 文件。
+[@ZenmoFeiShi](https://github.com/ZenmoFeiShi)
