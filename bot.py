@@ -10,6 +10,8 @@ import requests
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 
+from auth import ALLOWED_USER_IDS
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'data.db')
 BOT_TOKEN = os.environ['TG_BOT_TOKEN']
@@ -85,6 +87,11 @@ def notes_hash(text: str):
 
 def now_str():
     return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+
+async def unauthorized_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    uid = update.effective_user.id if update.effective_user else None
+    await update.effective_message.reply_text(f'⛔ 未授权使用。\n你的 Telegram UID：{uid}')
 
 
 async def start_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -165,11 +172,15 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def build_app():
     init_db()
     app = ApplicationBuilder().token(BOT_TOKEN).build()
-    app.add_handler(CommandHandler('start', start_cmd))
-    app.add_handler(CommandHandler('list', list_cmd))
-    app.add_handler(CommandHandler('canceltrack', canceltrack_cmd))
-    app.add_handler(CommandHandler('del', del_cmd))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_handler))
+    private_filter = filters.ChatType.PRIVATE
+    allowed_filter = private_filter & filters.User(user_id=ALLOWED_USER_IDS)
+    denied_filter = private_filter & ~filters.User(user_id=ALLOWED_USER_IDS)
+    app.add_handler(CommandHandler('start', start_cmd, filters=allowed_filter))
+    app.add_handler(CommandHandler('list', list_cmd, filters=allowed_filter))
+    app.add_handler(CommandHandler('canceltrack', canceltrack_cmd, filters=allowed_filter))
+    app.add_handler(CommandHandler('del', del_cmd, filters=allowed_filter))
+    app.add_handler(MessageHandler(allowed_filter & filters.TEXT & ~filters.COMMAND, text_handler))
+    app.add_handler(MessageHandler(denied_filter, unauthorized_handler))
     return app
 
 

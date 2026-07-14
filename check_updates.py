@@ -9,6 +9,8 @@ from datetime import datetime
 import requests
 from telegram import Bot
 
+from auth import ALLOWED_USER_IDS
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'data.db')
 BOT_TOKEN = os.environ['TG_BOT_TOKEN']
@@ -130,7 +132,11 @@ def should_notify(row, app):
 def main():
     init_db()
     conn = db()
-    rows = conn.execute('SELECT * FROM tracked_apps WHERE is_active=1').fetchall()
+    placeholders = ','.join('?' for _ in ALLOWED_USER_IDS)
+    rows = conn.execute(
+        f'SELECT * FROM tracked_apps WHERE is_active=1 AND CAST(user_id AS INTEGER) IN ({placeholders})',
+        tuple(ALLOWED_USER_IDS),
+    ).fetchall()
     bot = Bot(BOT_TOKEN)
     for row in rows:
         app = fetch_app(row['app_id'], row['region'], retries=5)

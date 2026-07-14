@@ -5,6 +5,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/root/apps/appstore_tracker
+EnvironmentFile=/etc/appstore-tracker/appstore-tracker.env
 ExecStart=/root/apps/appstore_tracker/run_bot.sh
 Restart=always
 RestartSec=5

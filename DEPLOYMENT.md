@@ -19,10 +19,13 @@
 | 变量名 | 必填 | 说明 |
 |---|---|---|
 | `TG_BOT_TOKEN` | 是 | Telegram Bot Token |
+| `TG_ALLOWED_USER_IDS` | 是 | 允许使用机器人的 Telegram UID；多个 UID 用英文逗号、分号或空格分隔 |
 | `TG_DEFAULT_CHAT_ID` | 否 | 预留变量，当前版本不是强依赖 |
 | `CHECK_INTERVAL_MINUTES` | 否 | 检查间隔分钟数，示例默认 `30` |
 
 建议使用单独的环境文件保存配置，不要把真实凭据写进仓库。
+
+`TG_ALLOWED_USER_IDS` 采用默认拒绝策略。未配置或格式错误时，机器人和更新检查任务都会拒绝启动。未绑定 UID 不能查看、添加或删除追踪，更新检查也不会向其推送。多个 UID 可写成 `123456789,987654321`。
 
 ## 🐍 本地安装
 
@@ -48,6 +51,7 @@ sudo nano /etc/appstore-tracker/appstore-tracker.env
 
 ```env
 TG_BOT_TOKEN=your_bot_token
+TG_ALLOWED_USER_IDS=123456789
 TG_DEFAULT_CHAT_ID=your_chat_id
 CHECK_INTERVAL_MINUTES=30
 ```
@@ -144,6 +148,7 @@ journalctl -u appstore-tracker-check.service -f
 
 ```env
 TG_BOT_TOKEN=your_bot_token
+TG_ALLOWED_USER_IDS=123456789
 TG_DEFAULT_CHAT_ID=your_chat_id
 CHECK_INTERVAL_MINUTES=30
 ```
@@ -231,6 +236,7 @@ journalctl -u appstore-tracker-bot.service -n 100 --no-pager
 cd /opt/app-store-update-tracker-bot
 . venv/bin/activate
 export TG_BOT_TOKEN="your_bot_token"
+export TG_ALLOWED_USER_IDS="your_telegram_uid"
 python3 check_updates.py
 ```
 

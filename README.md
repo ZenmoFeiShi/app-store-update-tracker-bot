@@ -10,6 +10,7 @@
 
 ## ✨ 功能
 
+- 通过 Telegram UID 白名单绑定使用者，默认拒绝未授权用户
 - 发送 App Store 链接后自动加入追踪
 - 自动解析 App ID 和国家/地区
 - 同一用户重复添加时自动去重
@@ -47,6 +48,7 @@ cp .env.example .env
 
 ```env
 TG_BOT_TOKEN=your_telegram_bot_token
+TG_ALLOWED_USER_IDS=123456789
 TG_DEFAULT_CHAT_ID=your_telegram_user_or_chat_id
 CHECK_INTERVAL_MINUTES=30
 ```
@@ -56,6 +58,7 @@ CHECK_INTERVAL_MINUTES=30
 ```bash
 . venv/bin/activate
 export TG_BOT_TOKEN="your_bot_token"
+export TG_ALLOWED_USER_IDS="your_telegram_uid"
 python3 bot.py
 ```
 
@@ -64,6 +67,7 @@ python3 bot.py
 ```bash
 . venv/bin/activate
 export TG_BOT_TOKEN="your_bot_token"
+export TG_ALLOWED_USER_IDS="your_telegram_uid"
 python3 check_updates.py
 ```
 
@@ -72,9 +76,12 @@ python3 check_updates.py
 | 变量名 | 必填 | 说明 |
 |---|---|---|
 | `TG_BOT_TOKEN` | 是 | Telegram Bot Token |
+| `TG_ALLOWED_USER_IDS` | 是 | 允许使用机器人的 Telegram UID；多个 UID 用英文逗号、分号或空格分隔 |
 | `TG_DEFAULT_CHAT_ID` | 否 | 预留变量，当前版本不是强依赖 |
 | `CHECK_INTERVAL_MINUTES` | 否 | 检查间隔分钟数，默认示例为 `30` |
 
+> `TG_ALLOWED_USER_IDS` 采用默认拒绝策略：未配置或格式错误时机器人与检查任务都会拒绝启动；未绑定用户发消息时只返回其 UID，不能查看、添加或删除追踪。更新检查也只处理绑定 UID 的记录。多个 UID 示例：`123456789,987654321`。
+>
 > 不要把真实 Token、Chat ID、数据库文件或日志提交到公开仓库。
 
 ## 🧩 项目结构

@@ -5,6 +5,7 @@ services:
     restart: unless-stopped
     environment:
       TG_BOT_TOKEN: ${TG_BOT_TOKEN}
+      TG_ALLOWED_USER_IDS: ${TG_ALLOWED_USER_IDS}
       TG_DEFAULT_CHAT_ID: ${TG_DEFAULT_CHAT_ID:-}
     volumes:
       - ./data:/app/data
@@ -16,6 +17,7 @@ services:
     restart: unless-stopped
     environment:
       TG_BOT_TOKEN: ${TG_BOT_TOKEN}
+      TG_ALLOWED_USER_IDS: ${TG_ALLOWED_USER_IDS}
       TG_DEFAULT_CHAT_ID: ${TG_DEFAULT_CHAT_ID:-}
       CHECK_INTERVAL_MINUTES: ${CHECK_INTERVAL_MINUTES:-30}
     volumes:
